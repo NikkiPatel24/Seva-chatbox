@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Budget Meds AI Assistant – believeinseva.org</title>
+<style>
+  /* ── Tokens ── */
+  :root {
+    --teal:    #1A7A6E;
+    --teal-lt: #E8F5F3;
+    --teal-dk: #135E55;
+    --amber:   #E07B2A;
+    --amber-lt:#FDF3EA;
+    --slate:   #2D3748;
+    --mist:    #F7FAFA;
+    --white:   #FFFFFF;
+    --border:  #C8DEDD;
+    --font-head: 'Georgia', serif;
+    --font-body: 'Segoe UI', Arial, sans-serif;
+    --radius: 16px;
+    --shadow: 0 8px 32px rgba(26,122,110,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--mist);
+    color: var(--slate);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+    max-width: 620px;
+  }
+  header .logo-line {
+    font-family: var(--font-head);
+    font-size: 1.75rem;
+    color: var(--teal-dk);
+    letter-spacing: -0.5px;
+  }
+  header .logo-line span { color: var(--amber); }
+  header p {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: #607070;
+    line-height: 1.5;
+  }
+
+  /* ── Explainer banner ── */
+  .explainer {
+    background: var(--amber-lt);
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    padding: 14px 18px;
+    max-width: 620px;
+    width: 100%;
+    margin-bottom: 24px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #6b4411;
+  }
+  .explainer strong { display: block; margin-bottom: 4px; font-size: 0.9rem; }
+
+  /* ── Chat widget ── */
+  .chat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-width: 620px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    background: var(--teal);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .chat-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--teal-dk);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .chat-header-text strong { display: block; font-size: 0.95rem; }
+  .chat-header-text span { font-size: 0.78rem; opacity: 0.85; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #5EE8A0; display: inline-block; margin-right: 5px;
+  }
+
+  /* ── Messages ── */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 340px;
+    max-height: 440px;
+  }
+
+  .bubble-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .bubble-wrap.user { flex-direction: row-reverse; }
+
+  .bubble-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .bot .bubble-icon { background: var(--teal-lt); color: var(--teal-dk); }
+  .user .bubble-icon { background: var(--amber-lt); color: var(--amber); }
+
+  .bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .bot .bubble {
+    background: var(--teal-lt);
+    border-bottom-left-radius: 4px;
+    color: #1a3030;
+  }
+  .user .bubble {
+    background: var(--teal);
+    border-bottom-right-radius: 4px;
+    color: white;
+  }
+
+  /* links inside bot bubbles */
+  .bubble a {
+    color: var(--teal-dk);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  .user .bubble a { color: #cff; }
+
+  /* quick-reply chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .chip {
+    background: white;
+    border: 2px solid var(--teal);
+    color: var(--teal-dk);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: var(--font-body);
+  }
+  .chip:hover { background: var(--teal); color: white; }
+  .chip:focus { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  /* typing indicator */
+  .typing { display: flex; gap: 4px; padding: 4px 0; }
+  .typing span {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--teal);
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%,60%,100% { transform: translateY(0); opacity:.5; }
+    30%          { transform: translateY(-6px); opacity:1; }
+  }
+
+  /* ── Input row ── */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--mist);
+  }
+  #userInput {
+    flex: 1;
+    border: 2px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+    color: var(--slate);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  #userInput:focus { border-color: var(--teal); }
+  #sendBtn {
+    background: var(--teal);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: var(--font-body);
+  }
+  #sendBtn:hover { background: var(--teal-dk); }
+  #sendBtn:disabled { opacity: 0.5; cursor: default; }
+
+  /* ── How it works section ── */
+  .how-section {
+    margin-top: 36px;
+    max-width: 620px;
+    width: 100%;
+  }
+  .how-section h2 {
+    font-family: var(--font-head);
+    font-size: 1.3rem;
+    color: var(--teal-dk);
+    margin-bottom: 18px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .step-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 520px) { .step-grid { grid-template-columns: 1fr; } }
+  .step-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 18px;
+    border-left: 4px solid var(--teal);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .step-card .num {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    color: var(--teal);
+    font-weight: bold;
+  }
+  .step-card h3 { font-size: 0.9rem; margin: 4px 0 6px; color: var(--slate); }
+  .step-card p  { font-size: 0.82rem; color: #607070; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-line">Budget Meds <span>&</span> Imaging</div>
+  <p>Affordable healthcare resources for Georgia families — powered by an AI guide that helps you find exactly what you need.</p>
+</header>
+
+<div class="explainer">
+  <strong>🤖 What is this AI agent?</strong>
+  This is a conversational AI assistant built specifically for this website. Instead of clicking through menus yourself, you simply describe what you need in plain English. The agent figures out which service fits your situation — free clinics, low-cost prescriptions, imaging, vision, or dental — and sends you directly to the right resource.
+</div>
+
+<div class="chat-card">
+  <div class="chat-header">
+    <div class="chat-avatar">🏥</div>
+    <div class="chat-header-text">
+      <strong>Seva Health Guide</strong>
+      <span><span class="status-dot"></span>Ready to help you find care</span>
+    </div>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="input-row">
+    <input id="userInput" type="text" placeholder="Tell me what kind of help you need…" autocomplete="off" />
+    <button id="sendBtn">Send</button>
+  </div>
+</div>
+
+<!-- How It Works explanation for the site owner -->
+<div class="how-section">
+  <h2>How This AI Agent Works (Plain English)</h2>
+  <div class="step-grid">
+
+    <div class="step-card">
+      <div class="num">1</div>
+      <h3>User types a question</h3>
+      <p>The visitor describes their situation in plain words — like "I need cheap blood pressure medication" or "where can I see a doctor for free in Cobb County?"</p>
+    </div>
+
+    <div class="step-card">
+      <div class="num">2</div>
+      <h3>The agent reads &amp; reasons</h3>
+      <p>Their message is sent to Claude (an AI model made by Anthropic). Claude reads the full conversation history so it remembers everything said earlier in the same chat.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="num">3</div>
+      <h3>Claude picks the right resource</h3>
+      <p>The agent has been given a detailed knowledge base of every page, clinic, pharmacy program, and county link on this website. It matches the user's need to the best option.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="num">4</div>
+      <h3>A helpful reply is shown</h3>
+      <p>Claude writes a warm, clear response with the right links and any follow-up questions needed. The whole loop takes about 2–4 seconds and costs fractions of a cent per conversation.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="num">5</div>
+      <h3>The conversation continues</h3>
+      <p>If the user asks a follow-up ("what about dental?"), the agent remembers the context and adjusts its answer without the user needing to re-explain their situation.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="num">6</div>
+      <h3>Zero personal data stored</h3>
+      <p>The conversation lives only in the browser tab. When the user closes the page, nothing is saved. This protects visitor privacy and avoids HIPAA complications.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Site knowledge base injected into every AI call ──
+const SYSTEM_PROMPT = `You are Seva Health Guide, a warm and knowledgeable assistant for the Budget Meds & Imaging website (believeinseva.org). Your sole job is to help visitors in Georgia quickly find the affordable healthcare resource that fits their specific need.
+
+WEBSITE RESOURCES:
+1. FREE MEDICAL CLINICS by Georgia county (page: /free-clinics):
+   - Butts County: Faith Medical – http://faithmedical.org
+   - Carroll County: Rapha Clinic – https://raphaclinic.org
+   - Chatham County: JC Lewis Health – https://www.jclewishealth.org
+   - Clarke County: Mercy Health Center – https://mercyhealthcenter.net
+   - Clayton County: Good Shepherd Clinic – https://goodshepherdclinic.org
+   - Cherokee County: Must Ministries – https://www.mustministries.org
+   - Cobb County: Good Sam Cobb – https://goodsamcobb.org
+   - Coweta/Newnan: Coweta Samaritan Clinic – https://cowetasamaritanclinic.org
+   - DeKalb County: Physicians Care Clinic – https://www.physicianscareclinic.org
+   - Fayette County: Fayette Care Clinic – https://fayettecareclinic.com
+   - Fulton County: Good Sam Atlanta – https://goodsamatlanta.org
+   - Gwinnett County: Good Sam Gwinnett – https://www.goodsamgwinnett.org
+   - Hall County: Good News Clinics – https://www.goodnewsclinics.org
+   - Henry County: Hands of Hope – https://handsofhopeclinic.org
+   - Newton County: Willing Helpers Clinic – https://www.willinghelpersclinic.com
+   - Richmond County: CCHS Augusta – https://www.cchsaugusta.org
+   - Rural Georgia (general): CHCS Georgia – https://www.chcsga.org
+
+2. LOW-COST MEDICATIONS (page: /low-cost-medications):
+   - Publix free generic list: https://pharmacy.fbmcbenefits.com/wp-content/uploads/2022/05/Publix-Next-Best-Thing-to-Free-Generic-Listing-1.pdf
+   - Walmart $4 prescriptions: https://www.walmart.com/cp/4-prescriptions/1078664
+   - GoodRx (compare prices): https://www.goodrx.com/
+   - Kroger Health Savings: https://www.krogerhealthsavings.com/drug
+   - SingleCare: https://www.singlecare.com/
+   - Amazon Pharmacy: https://pharmacy.amazon.com/
+
+3. LOW-COST IMAGING (page: /low-cost-imaging) — direct the user to visit that page.
+
+4. FREE VISION CLINICS in Georgia (page: /free-vision-clinics) — direct the user to visit that page.
+
+5. FREE DENTAL CLINICS in Georgia (page: /free-dental-clinics) — direct the user to visit that page.
+
+INSTRUCTIONS:
+- Always ask the user's Georgia county if they need a clinic and haven't mentioned it, so you can give a specific match.
+- When recommending medications, ask if they want the cheapest option, most convenient, or if they want to compare prices — then tailor the suggestion.
+- Keep answers short, warm, and plain. Use simple English. Avoid medical jargon.
+- Never give medical advice or diagnose. You help people find resources, not treat them.
+- If you are unsure, say so honestly and suggest contacting the clinic directly.
+- Format links as plain anchor tags when needed.
+- Limit your response to 3–5 sentences unless more detail is truly necessary.`;
+
+const messages = []; // conversation history
+
+// ── Render helpers ──
+function addMessage(role, html, chips) {
+  const wrap = document.createElement('div');
+  wrap.className = `bubble-wrap ${role}`;
+
+  const icon = document.createElement('div');
+  icon.className = 'bubble-icon';
+  icon.textContent = role === 'bot' ? '🏥' : '👤';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = html;
+
+  if (chips && chips.length) {
+    const chipRow = document.createElement('div');
+    chipRow.className = 'chips';
+    chips.forEach(label => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.textContent = label;
+      btn.onclick = () => handleSend(label);
+      chipRow.appendChild(btn);
+    });
+    bubble.appendChild(chipRow);
+  }
+
+  wrap.appendChild(icon);
+  wrap.appendChild(bubble);
+  document.getElementById('messages').appendChild(wrap);
+  scrollBottom();
+}
+
+function addTyping() {
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap bot';
+  wrap.id = 'typing';
+  const icon = document.createElement('div');
+  icon.className = 'bubble-icon';
+  icon.textContent = '🏥';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  wrap.appendChild(icon);
+  wrap.appendChild(bubble);
+  document.getElementById('messages').appendChild(wrap);
+  scrollBottom();
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+function scrollBottom() {
+  const box = document.getElementById('messages');
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── AI call ──
+async function callClaude(userText) {
+  messages.push({ role: 'user', content: userText });
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': 'sk-ant-api03-ii-CuF-SXYawthClc6iEEvd_hkIijvkvG72CqzlZJrg4ZkqYyLmtCNbKs59o0fSlOe0o63URMAuD0aIIqGyG7Ew-BXstkQAA', 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      messages: messages
+    })
+  });
+
+  const data = await resp.json();
+  const text = data.content?.find(b => b.type === 'text')?.text || 'Sorry, I couldn\'t get a response. Please try again.';
+  messages.push({ role: 'assistant', content: text });
+  return text;
+}
+
+// ── Send handler ──
+async function handleSend(overrideText) {
+  const input = document.getElementById('userInput');
+  const btn   = document.getElementById('sendBtn');
+  const text  = (overrideText || input.value).trim();
+  if (!text) return;
+
+  input.value = '';
+  btn.disabled = true;
+
+  addMessage('user', escapeHtml(text));
+  addTyping();
+
+  try {
+    const reply = await callClaude(text);
+    removeTyping();
+    addMessage('bot', linkify(reply));
+  } catch (e) {
+    removeTyping();
+    addMessage('bot', 'Something went wrong. Please refresh and try again.');
+  }
+
+  btn.disabled = false;
+  input.focus();
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function linkify(text) {
+  // Convert markdown-style **bold** 
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Convert bare URLs to links
+  text = text.replace(/(https?:\/\/[^\s<>")\]]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  // Newlines to <br>
+  text = text.replace(/\n/g, '<br>');
+  return text;
+}
+
+// ── Event listeners ──
+document.getElementById('sendBtn').addEventListener('click', () => handleSend());
+document.getElementById('userInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleSend();
+});
+
+// ── Welcome message ──
+addMessage('bot',
+  'Hi! I\'m your Seva Health Guide. 👋<br><br>I can help you find free clinics, affordable prescriptions, low-cost imaging, vision care, and dental services in Georgia — all in seconds. What do you need help with today?',
+  ['Free clinic near me', 'Cheap medications', 'Low-cost imaging', 'Vision or dental care']
+);
+</script>
+</body>
+</html>
